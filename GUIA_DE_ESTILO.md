@@ -2,7 +2,14 @@
 
 Baseado nas 8 referências da pasta do Drive (out/2026).
 
-## Antes de editar: perguntar a função do vídeo
+## Padrão de entrega: só os cortes
+
+A Bianka normalmente coloca legenda e elementos gráficos ela mesma. Por padrão,
+entregar **só os cortes** (retomadas e pausas removidas pelo roteiro), na resolução
+original, sem legenda, destaques, zoom ou ajuste de cor
+(`build_editar.py --so-cortes`). Edição completa só quando ela pedir.
+
+## Edição completa: perguntar a função do vídeo
 
 | Função | Cor do texto | Observação |
 |---|---|---|
