@@ -20,6 +20,8 @@ Baseado nas 8 referências da pasta do Drive (out/2026).
 - Cortar pausas e respiros (nenhum silêncio > 0,5 s)
 - Zoom de corte (punch-in no rosto) para dar ênfase em frases-chave
 - Transição glitch: uso pontual
+- Referências de corte puro (refs 1 e 8): jump cuts no mesmo enquadramento,
+  um a cada ~4–6 s (mín. ~2 s), removendo pausas, erros e repetições
 
 ## Legendas
 
