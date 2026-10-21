@@ -5,6 +5,7 @@ SRC = "work/editar.mov"
 WORDS = "work/editar.mov.json"
 ASS = "work/editar.ass"
 OUT = sys.argv[1] if len(sys.argv) > 1 else "work/editar_v2.mp4"
+SO_CORTES = "--so-cortes" in sys.argv  # sem legenda, destaques, zoom nem ajuste de cor
 PAD = 0.12
 
 # Trechos do bruto que ficam (tempo do original). Retomadas/erros ficam de fora.
@@ -171,16 +172,18 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     # Vídeo: corta, aplica zoom de ênfase por trecho, concatena, legenda
     f = []
     for i, (a, b) in enumerate(segs):
-        z = next((zv for zt, zv in ZOOMS.items() if a <= zt <= b), 1.0)
+        z = 1.0 if SO_CORTES else next((zv for zt, zv in ZOOMS.items() if a <= zt <= b), 1.0)
         crop = f",crop=iw/{z}:ih/{z}:(iw-iw/{z})/2:(ih-ih/{z})*0.3" if z > 1 else ""
-        f.append(f"[0:v]trim={a:.3f}:{b:.3f},setpts=PTS-STARTPTS{crop},scale=1080:1920:flags=lanczos,setsar=1[v{i}];"
+        scale = "" if SO_CORTES else ",scale=1080:1920:flags=lanczos"
+        f.append(f"[0:v]trim={a:.3f}:{b:.3f},setpts=PTS-STARTPTS{crop}{scale},setsar=1[v{i}];"
                  f"[0:a]atrim={a:.3f}:{b:.3f},asetpts=PTS-STARTPTS,afade=t=in:d=0.02,afade=t=out:st={b - a - 0.03:.3f}:d=0.03[a{i}]")
     n = len(segs)
     f.append("".join(f"[v{i}][a{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=1[vc][ac];"
-             f"[vc]eq=brightness=0.02:saturation=1.05,ass={ASS}:fontsdir=fonts/static[vo];"
+             + ("[vc]null[vo];" if SO_CORTES else f"[vc]eq=brightness=0.02:saturation=1.05,ass={ASS}:fontsdir=fonts/static[vo];")
+             + 
              "[ac]loudnorm=I=-14:TP=-1.5:LRA=11[ao]")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", SRC, "-filter_complex", ";".join(f),
-                    "-map", "[vo]", "-map", "[ao]", "-c:v", "libx264", "-preset", "slow", "-crf", "23",
+                    "-map", "[vo]", "-map", "[ao]", "-c:v", "libx264", "-preset", "slow", "-crf", "18" if SO_CORTES else "23",
                     "-maxrate", "8M", "-bufsize", "16M", "-pix_fmt", "yuv420p", "-r", "30",
                     "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", OUT], check=True)
     print("ok", OUT)
